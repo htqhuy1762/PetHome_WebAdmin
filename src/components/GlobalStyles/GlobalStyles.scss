@@ -1,0 +1,29 @@
+@import 'normalize.css';
+
+:root {
+    --primary: #3ac5ca;
+    --start-color: #0b434f;
+    --mid-color: #0fa4af;
+    --end-color: #91f5ef;
+    --button-next-color: #0B434F;
+    --button-back-color: #e0f7fa;
+    --navbar-color: #3ac5ca;
+    --header-color: #3ac5ca;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.6rem;
+    line-height: 1.5;
+    text-rendering: optimizeSpeed;
+}

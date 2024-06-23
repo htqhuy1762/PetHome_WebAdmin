@@ -4,35 +4,34 @@ import { publicRoutes, privateRoutes } from '~/routes';
 import { DefaultLayout } from './layouts';
 // import { AuthContext } from '~/components/AuthProvider/index.jsx';
 
-function PrivateRoute({ children }) {
-    const navigate = useNavigate();
-    const { isLoggedIn, isLoading } = useContext(AuthContext);
+// function PrivateRoute({ children }) {
+//     const navigate = useNavigate();
+//     const { isLoggedIn, isLoading } = useContext(AuthContext);
 
-    useEffect(() => {
-        if (!isLoading) {
-            const checkTimeout = setTimeout(() => {
-                if (!isLoggedIn) {
-                    navigate('/login');
-                }
-            }, 1000);
+//     useEffect(() => {
+//         if (!isLoading) {
+//             const checkTimeout = setTimeout(() => {
+//                 if (!isLoggedIn) {
+//                     navigate('/login');
+//                 }
+//             }, 1000);
 
-            return () => clearTimeout(checkTimeout);
-        }
-    }, [isLoggedIn, navigate, isLoading]);
+//             return () => clearTimeout(checkTimeout);
+//         }
+//     }, [isLoggedIn, navigate, isLoading]);
 
-    if (isLoading) {
-        return null;
-    }
+//     if (isLoading) {
+//         return null;
+//     }
 
-    return isLoggedIn ? children : null;
-}
+//     return isLoggedIn ? children : null;
+// }
 
 function App() {
     //const { isLoggedIn, isLoading } = useContext(AuthContext);
     return (
         <Router>
             <div className="App">
-                {!isLoading && isLoggedIn && <ChatBox shopInfo={idShop}/>}
                 <Routes>
                     {publicRoutes.map((route, index) => {
                         let Layout = DefaultLayout;

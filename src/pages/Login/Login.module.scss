@@ -1,0 +1,39 @@
+.wrapper {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f4f2ee;
+}
+
+.logo_container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .logo {
+        width: 100px;
+        height: 100px;
+    }
+
+    .logo_title {
+        width: 140px;
+        height: 80px;
+    }
+}
+
+.form_container {
+    width: 30%;
+    padding: 20px;
+    background-color: white;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc;
+
+    .form {
+        width: 400px;
+    }
+}

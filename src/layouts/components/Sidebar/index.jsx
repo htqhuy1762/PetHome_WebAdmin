@@ -9,32 +9,9 @@ const cx = classNames.bind(styles);
 function Sidebar() {
     const location = useLocation();
     const [selectedKey, setSelectedKey] = useState(location.pathname);
-    const [userData, setUserData] = useState(null);
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        const getUser = async () => {
-            setLoading(true);
-            try {
-                const response = await userServices.getUser();
-                if (response.status === 200) {
-                    setUserData(response.data);
-                }
-            } catch (error) {
-                // Handle error
-            }
-            setLoading(false);
-        };
-
-        getUser();
-    }, []);
-
-    useEffect(() => {
-        if (location.pathname.startsWith('/user/shop')) {
-            setSelectedKey('/user/shop');
-        } else {
-            setSelectedKey(location.pathname);
-        }
+        setSelectedKey(location.pathname);
     }, [location.pathname]);
 
     const items = [
@@ -42,53 +19,51 @@ function Sidebar() {
             key: '1',
             label: 'Customer Management',
             children: [
-                { key: '/user/account/profile', label: <a href="/user/account/profile">Report Tickets</a> },
-                { key: '/user/account/payment', label: <a href="/user/account/payment">Customers List</a> },
+                { key: '/customer/report', label: <a href="/customer/report">Report Tickets</a> },
+                { key: '/customer/list', label: <a href="/customer/list">List of Customers</a> },
             ],
         },
         {
             key: '2',
             label: 'Shop Management',
             children: [
-                { key: '/user/account/profile', label: <a href="/user/account/profile">Request Tickets</a> },
-                { key: '/user/account/payment', label: <a href="/user/account/payment">List of Stores</a> },
+                { key: '/shop/report', label: <a href="/shop/report">Request Tickets</a> },
+                { key: '/shop/list', label: <a href="/shop/list">List of Shops</a> },
             ],
         },
         {
             key: '3',
             label: 'Item Management',
             children: [
-                { key: '/user/account/profile', label: <a href="/user/account/profile">Request Tickets</a> },
-                { key: '/user/account/payment', label: <a href="/user/account/payment">List of Items</a> },
+                { key: '/item/report', label: <a href="/item/report">Request Tickets</a> },
+                { key: '/item/list', label: <a href="/item/list">List of Items</a> },
             ],
         },
         {
             key: '4',
             label: 'Service Management',
             children: [
-                { key: '/user/account/profile', label: <a href="/user/account/profile">Request Tickets</a> },
-                { key: '/user/account/payment', label: <a href="/user/account/payment">List of Services</a> },
+                { key: '/service/report', label: <a href="/service/report">Request Tickets</a> },
+                { key: '/service/list', label: <a href="/service/list">List of Services</a> },
             ],
         },
         {
             key: '5',
             label: 'Pet Management',
             children: [
-                { key: '/user/account/profile', label: <a href="/user/account/profile">Request Tickets</a> },
-                { key: '/user/account/payment', label: <a href="/user/account/payment">List of Pets</a> },
+                { key: '/pet/report', label: <a href="/pet/report">Request Tickets</a> },
+                { key: '/pet/list', label: <a href="/pet/list">List of Pets</a> },
             ],
         },
         {
             key: '6',
             label: 'System Management',
             children: [
-                { key: '/user/account/profile', label: <a href="/user/account/profile">Payment</a> },
-                { key: '/user/account/payment', label: <a href="/user/account/payment">Item, Service, Pet Type</a> },
+                { key: '/system/payment', label: <a href="/system/payment">Payment</a> },
+                { key: '/system/type', label: <a href="/system/type">Item, Service, Pet Type</a> },
             ],
         },
     ];
-
-
 
     return (
         <div className={cx('wrapper')}>

@@ -24,3 +24,30 @@
 .title {
     margin-left: 20px;
 }
+
+.right-menu {
+    display: flex;
+    align-items: center;
+    height: 85px;
+    position: absolute;
+    right: 20px;
+
+    .cart {
+        //margin-left: 5px;
+        margin-top: 10px;
+
+        .cart-btn:hover {
+            background-color: initial !important;
+        }
+    }
+
+    .user {
+        display: flex;
+        align-items: center;
+        margin-left: 15px;
+        .user-btn:hover {
+            color: #fff;
+            background-color: var(--button-next-color);
+        }
+    }
+}

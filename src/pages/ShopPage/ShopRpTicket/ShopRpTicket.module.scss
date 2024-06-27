@@ -1,0 +1,31 @@
+.wrapper {
+    width: 100%;
+}
+
+.container {
+    width: 100%;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.action-button {
+    margin-right: 8px; // Khoảng cách giữa các nút
+}
+.action-button.active {
+    background-color: #52c41a; // Màu nền cho nút Active
+    border-color: #52c41a; // Màu viền cho nút Active
+    color: white; // Màu chữ cho nút Active
+}
+.action-button.inactive {
+    background-color: #f5222d; // Màu nền cho nút Inactive
+    border-color: #f5222d; // Màu viền cho nút Inactive
+    color: white; // Màu chữ cho nút Inactive
+}

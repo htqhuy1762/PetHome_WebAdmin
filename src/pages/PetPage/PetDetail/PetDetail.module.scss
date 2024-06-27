@@ -7,7 +7,7 @@
 .pet-detail-left {
     background-color: white;
     margin-right: 10px;
-    padding: 10px;
+    padding: 20px;
 }
 
 .pet-detail-description {
@@ -20,13 +20,13 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin-bottom: 5px;
+    margin-bottom: 15px;
 }
 
 .label {
     font-weight: bold;
     background-color: lightblue;
-    width: 120px;
+    width: 150px;
     padding: 5px; /* adjust as needed */
 }
 
@@ -39,23 +39,30 @@
     color: red;
 }
 
-.in-stock {
+.status-active {
     color: green;
 }
 
-.out-of-stock {
+.status-inactive {
     color: red;
+}
+
+.status-requested {
+    color: orange;
 }
 
 .pet-detail-shop {
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin-top: 50px;
+    margin-top: 100px;
 }
 
 .pet-detail-shop-left {
     margin-right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .pet-detail-shop-info {
@@ -77,4 +84,16 @@
 
 .pet-detail-description-content {
     white-space: pre-wrap;
+}
+
+
+.button-allow {
+    background-color: green;
+    border-color: green;
+}
+
+.button-deny {
+    background-color: red;
+    border-color: red;
+    margin-left: 20px;
 }

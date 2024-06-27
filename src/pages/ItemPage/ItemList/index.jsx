@@ -1,10 +1,16 @@
 import classNames from 'classnames/bind';
 import styles from './ItemList.module.scss';
 import * as itemServices from '~/services/itemServices';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Loading from '~/components/Loading';
-import { Pagination, Table } from 'antd';
+import { Pagination, Table, Input, Button, Space } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
+import Highlighter from 'react-highlight-words';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 const cx = classNames.bind(styles);
 
@@ -16,28 +22,64 @@ function ItemList() {
     const [currentPage, setCurrentPage] = useState(1);
     const limit = 15; // Số lượng mục trên mỗi trang
     const [total, setTotal] = useState(0);
+    const [filterStatus, setFilterStatus] = useState(null); // Thêm trạng thái filter
+    const [searchText, setSearchText] = useState('');
+    const [searchedColumn, setSearchedColumn] = useState('');
+    const searchInput = useRef(null);
 
     useEffect(() => {
         fetchData();
-    }, [currentPage]); // Khi currentPage thay đổi, gọi fetchData lại
+    }, [currentPage, filterStatus, searchText, searchedColumn]); // Khi currentPage thay đổi, gọi fetchData lại
 
     const fetchData = async () => {
         setLoading(true);
         try {
             const start = (currentPage - 1) * limit;
-            const response = await itemServices.getItems({ start, limit });
+            let params = { start, limit };
+
+            // Xử lý khi có filterStatus
+            if (filterStatus !== null) {
+                if (Array.isArray(filterStatus)) {
+                    params.status = filterStatus.map((status) => `'${status}'`).join(',');
+                } else {
+                    params.status = `'${filterStatus}'`;
+                }
+            } else {
+                // Nếu không có filterStatus, mặc định lấy active và inactive
+                params.status = "'active','inactive'";
+            }
+
+            // Thêm điều kiện tìm kiếm
+            if (searchText) {
+                params.search = searchText;
+            }
+
+            const response = await itemServices.getItems(params);
+            console.log(response);
             if (response.status === 200) {
-                const rawData = response.data.data;
+                const rawData = response.data.items;
                 setData(rawData);
                 setTotal(response.data.count);
-                
+
                 // Tạo các cột động từ dữ liệu
                 if (rawData.length > 0) {
-                    const keys = Object.keys(rawData[0]);
+                    const keys = Object.keys(rawData[0]).filter(
+                        (key) => key !== 'instock' && key !== 'picture' && key !== 'id_shop',
+                    );
                     const dynamicColumns = keys.map((key) => ({
                         title: key.charAt(0).toUpperCase() + key.slice(1),
                         dataIndex: key,
                         key: key,
+                        filters:
+                            key === 'status'
+                                ? [
+                                      { text: 'Active', value: 'active' },
+                                      { text: 'Inactive', value: 'inactive' },
+                                  ]
+                                : null,
+                        onFilter: key === 'status' ? (value, record) => record[key] === value : null,
+                        render: key === 'created_at' ? (text) => dayjs(text).format('HH:mm:ss DD-MM-YYYY') : undefined,
+                        ...getColumnSearchProps(key),
                     }));
                     setColumns(dynamicColumns);
                 }
@@ -49,6 +91,66 @@ function ItemList() {
         }
     };
 
+    const getColumnSearchProps = (dataIndex) => ({
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+            <div style={{ padding: 8 }}>
+                <Input
+                    ref={searchInput}
+                    placeholder={`Search ${dataIndex}`}
+                    value={selectedKeys[0]}
+                    onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                    onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                    style={{ marginBottom: 8, display: 'block' }}
+                />
+                <Space>
+                    <Button
+                        type="primary"
+                        onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                        icon={<SearchOutlined />}
+                        size="small"
+                        style={{ width: 90 }}
+                    >
+                        Search
+                    </Button>
+                    <Button onClick={() => handleReset(clearFilters)} size="small" style={{ width: 90 }}>
+                        Reset
+                    </Button>
+                </Space>
+            </div>
+        ),
+        filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+        onFilter: (value, record) =>
+            record[dataIndex] ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()) : '',
+        onFilterDropdownVisibleChange: (visible) => {
+            if (visible) {
+                setTimeout(() => searchInput.current.select(), 100);
+            }
+        },
+        render: (text) =>
+            searchedColumn === dataIndex ? (
+                <Highlighter
+                    highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+                    searchWords={[searchText]}
+                    autoEscape
+                    textToHighlight={text ? text.toString() : ''}
+                />
+            ) : (
+                text
+            ),
+    });
+
+    const handleSearch = (selectedKeys, confirm, dataIndex) => {
+        confirm();
+        setSearchText(selectedKeys[0]);
+        setSearchedColumn(dataIndex);
+    };
+
+    const handleReset = (clearFilters) => {
+        clearFilters();
+        setSearchText('');
+        setSearchedColumn('');
+    };
+
     const goToItemDetail = (id) => {
         navigate(`/items/${id}`);
     };
@@ -57,18 +159,37 @@ function ItemList() {
         return <Loading />;
     }
 
+    console.log('data:', data);
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container')}>
                 <Table
                     columns={columns}
                     dataSource={data}
-                    pagination={false} // Để sử dụng pagination của Table của Ant Design, cài đặt tùy chỉnh bên dưới
+                    pagination={false}
                     rowKey="id_item"
                     onRow={(record) => ({
                         onClick: () => goToItemDetail(record.id_item),
                     })}
                     scroll={{ x: 'max-content' }}
+                    onChange={(pagination, filters, sorter) => {
+                        if (filters.status) {
+                            setFilterStatus(filters.status[0]);
+                        } else {
+                            setFilterStatus(null);
+                        }
+                        if (sorter.order) {
+                            setColumns((prevColumns) =>
+                                prevColumns.map((col) => ({
+                                    ...col,
+                                    sorter: col.dataIndex === sorter.field,
+                                    sortOrder: col.dataIndex === sorter.field ? sorter.order : null,
+                                }))
+                            );
+                        }
+                    }}
+                    rowClassName={() => cx('pointer')}
                 />
                 <div className={cx('pagination-container')}>
                     <Pagination

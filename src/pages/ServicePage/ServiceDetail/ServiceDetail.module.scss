@@ -3,19 +3,19 @@
     display: flex;
 }
 
-.item-detail-left {
+.service-detail-left {
     background-color: white;
     margin-right: 10px;
     padding: 20px;
 }
 
-.item-detail-right {
-    .item-detail-image {
+.service-detail-right {
+    .service-detail-image {
         margin-bottom: 20px;
     }
 }
 
-.item-detail-field {
+.service-detail-field {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -34,12 +34,12 @@
     margin-left: 10px; /* adjust as needed */
 }
 
-.item-detail-shop {
+.service-detail-shop {
     display: flex;
     align-items: center;
     margin-top: 100px;
 
-    .item-detail-shop-left {
+    .service-detail-shop-left {
         margin-right: 20px;
         display: flex;
         flex-direction: column;
@@ -47,21 +47,21 @@
     }
 }
 
-.item-detail-right {
+.service-detail-right {
     width: 40%;
 }
 
-.item-detail-image {
+.service-detail-image {
     margin-bottom: 20px;
 }
 
-.item-detail-description {
+.service-detail-description {
     margin-top: 20px;
     background-color: white;
     padding: 10px;
 }
 
-.item-detail-description-content {
+.service-detail-description-content {
     white-space: pre-wrap;
 }
 

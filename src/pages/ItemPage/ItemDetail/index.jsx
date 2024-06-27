@@ -1,4 +1,4 @@
-import { Button, Image, Avatar, Descriptions, Carousel } from 'antd';
+import { Button, Image, Avatar, Descriptions, Carousel, message } from 'antd';
 import classNames from 'classnames/bind';
 import styles from './ItemDetail.module.scss';
 import { UserOutlined } from '@ant-design/icons';
@@ -11,29 +11,6 @@ import React from 'react';
 const cx = classNames.bind(styles);
 
 function ItemDetail() {
-    const [options, setOptions] = useState(null);
-
-    const [selectedItem, setSelectedItem] = useState(null);
-
-    const handleButtonClick = (id_item, id_item_detail, instock, price, size) => {
-        const findItem = itemData.details.find((item) => item.id_item_detail === id_item_detail);
-        setSelectedItem({
-            id_item,
-            id_item_detail,
-            instock,
-            price,
-            size,
-            id_shop: itemData.id_shop,
-            name: itemData.name,
-            picture: itemData.picture,
-            shop_name: itemData.shop.name,
-            status: itemData.status,
-            unit: itemData.unit,
-            quantity: findItem.quantity,
-            fromCart: false,
-        });
-    };
-
     const { id } = useParams();
     const [itemData, setItemData] = useState(null);
 
@@ -47,25 +24,6 @@ function ItemDetail() {
 
         fetchData();
     }, [id]);
-
-    useEffect(() => {
-        if (itemData) {
-            const sortedOptions = [...itemData.details].sort((a, b) => a.order_item - b.order_item);
-            setOptions(sortedOptions);
-        }
-    }, [itemData]);
-
-    useEffect(() => {
-        if (options && options.length > 0) {
-            handleButtonClick(
-                options[0].id_item,
-                options[0].id_item_detail,
-                options[0].instock,
-                options[0].price,
-                options[0].size,
-            );
-        }
-    }, [options]);
 
     const items = useMemo(() => {
         if (!itemData) {
@@ -90,71 +48,117 @@ function ItemDetail() {
         ];
     }, [itemData]);
 
+    const handleUpdateStatus = async (status) => {
+        try {
+            const response = await itemServices.updateStatusItem(id, status);
+            if (response.status === 200) {
+                message.success('Cập nhật trạng thái thành công');
+                setItemData({ ...itemData, status });
+            }
+        } catch (error) {
+            message.error('Cập nhật trạng thái thất bại');
+        }
+    };
+
     console.log(itemData);
 
     return itemData ? (
         <div className={cx('wrapper')}>
             <div className={cx('item-detail-left')}>
                 <div className={cx('item-detail-info')}>
-                    <p style={{ fontSize: '2.5rem', fontWeight: '500', lineHeight: '30px' }}>{itemData.name}</p>
-                    <div className={cx('item-detail-info-desc')}>
-                        <div className={cx('sold')}>
-                            <p>{itemData.ratings.rating_count} Đánh giá</p>
-                        </div>
+                    <div className={cx('item-detail-field')}>
+                        <div className={cx('label')}>ID Vật phẩm:</div>
+                        <div className={cx('value')}>{itemData.id_item}</div>
                     </div>
-                    <div className={cx('price')}>
-                        {selectedItem && (
-                            <p style={{ color: 'red', marginLeft: '20px' }}>
-                                {selectedItem.price?.toLocaleString('vi-VN')} đ
-                            </p>
-                        )}
+                    <div className={cx('item-detail-field')}>
+                        <div className={cx('label')}>ID Loại:</div>
+                        <div className={cx('value')}>{itemData.id_item_type_detail}</div>
                     </div>
-                    <div className={cx('type')}>
-                        {options?.map((option, index) => (
-                            <Button
-                                key={index}
-                                style={{
-                                    height: '40px',
-                                    width: '80px',
-                                    marginRight: '10px',
-                                    backgroundColor:
-                                        selectedItem && selectedItem.size === option.size
-                                            ? 'var(--button-next-color)'
-                                            : 'white',
-                                    color: selectedItem && selectedItem.size === option.size ? 'white' : 'black',
-                                    border: '2px solid var(--button-next-color)',
-                                }}
-                                onClick={() =>
-                                    handleButtonClick(
-                                        option.id_item,
-                                        option.id_item_detail,
-                                        option.instock,
-                                        option.price,
-                                        option.size,
-                                    )
-                                }
-                            >
-                                {option.size} {itemData.unit}
-                            </Button>
+                    <div className={cx('item-detail-field')}>
+                        <div className={cx('label')}>Tên:</div>
+                        <div className={cx('value')}>{itemData.name}</div>
+                    </div>
+                    <div className={cx('item-detail-field')}>
+                        <div className={cx('label')}>Phân loại hàng:</div>
+                        {itemData.details.map((detail, index) => (
+                            <div key={index}>
+                                <div className={cx('value')}>
+                                    {'('}
+                                    {detail.size}
+                                    {itemData.unit}
+                                    {' / '}
+                                    {detail.price.toLocaleString('vi-VN')}đ{')'}
+                                </div>
+                            </div>
                         ))}
                     </div>
-                    <div className={cx('item-state', selectedItem?.instock ? 'in-stock' : 'out-of-stock')}>
-                        <p>{selectedItem?.instock ? 'Còn hàng' : 'Hết hàng'}</p>
+                    <div className={cx('item-detail-field')}>
+                        <div className={cx('label')}>Trạng thái:</div>
+                        <div
+                            className={cx('value', {
+                                'status-active': itemData.status === 'active',
+                                'status-inactive': itemData.status === 'inactive',
+                                'status-requested': itemData.status === 'requested',
+                            })}
+                        >
+                            {itemData.status}
+                        </div>
+                    </div>
+                    <div className={cx('item-detail-field')}>
+                        <div className={cx('label')}>Hành động:</div>
+                        <div className={cx('value')}>
+                            {itemData.status === 'active' && (
+                                <Button danger type="primary" onClick={() => handleUpdateStatus('inactive')}>
+                                    Inactive
+                                </Button>
+                            )}
+                            {itemData.status === 'inactive' && (
+                                <Button
+                                    type="primary"
+                                    style={{ backgroundColor: 'green', borderColor: 'green' }}
+                                    onClick={() => handleUpdateStatus('active')}
+                                >
+                                    Active
+                                </Button>
+                            )}
+                            {itemData.status === 'requested' && (
+                                <>
+                                    <Button
+                                        className={cx('button-allow')}
+                                        type="primary"
+                                        onClick={() => handleUpdateStatus('active')}
+                                    >
+                                        Approve
+                                    </Button>
+                                    <Button
+                                        className={cx('button-deny')}
+                                        type="primary"
+                                        danger
+                                        onClick={() => handleUpdateStatus('inactive')}
+                                    >
+                                        Deny
+                                    </Button>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
-                <div className={cx('item-detail-shop-left')}>
-                    <Avatar
-                        src={itemData.shop?.logo ? itemData.shop.logo : null}
-                        icon={!itemData.shop?.logo ? <UserOutlined /> : null}
-                        size={100}
-                        style={{ border: '1px solid rgb(0, 0, 0, 0.25)' }}
-                    />
-                    <div className={cx('item-detail-shop-info')}>
-                        <p style={{ fontSize: '2rem', marginBottom: '15px' }}>{itemData.shop.name}</p>
+
+                <div className={cx('item-detail-shop')}>
+                    <div className={cx('item-detail-shop-left')}>
+                        <Avatar
+                            src={itemData.shop?.logo ? itemData.shop.logo : null}
+                            icon={!itemData.shop?.logo ? <UserOutlined /> : null}
+                            size={100}
+                            style={{ border: '1px solid rgb(0, 0, 0, 0.25)' }}
+                        />
+                        <div className={cx('item-detail-shop-info')}>
+                            <p style={{ fontSize: '2rem', marginBottom: '15px', marginTop: '2px' }}>{itemData.shop.name}</p>
+                        </div>
                     </div>
-                </div>
-                <div className={cx('item-detail-shop-right')}>
-                    <Descriptions layout="horizontal" title="Thông tin shop" items={items} />
+                    <div className={cx('item-detail-shop-right')}>
+                        <Descriptions layout="horizontal" title="Thông tin shop" items={items} />
+                    </div>
                 </div>
             </div>
             <div className={cx('item-detail-right')}>

@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import Loading from '~/components/Loading';
 import { Pagination, Table, Input, Button, Space } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import Highlighter from 'react-highlight-words';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
@@ -39,23 +38,13 @@ function ItemList() {
 
             // Xử lý khi có filterStatus
             if (filterStatus !== null) {
-                if (Array.isArray(filterStatus)) {
-                    params.status = filterStatus.map((status) => `'${status}'`).join(',');
-                } else {
-                    params.status = `'${filterStatus}'`;
-                }
+                params.status = `'${filterStatus}'`;
             } else {
                 // Nếu không có filterStatus, mặc định lấy active và inactive
                 params.status = "'active','inactive'";
             }
 
-            // Thêm điều kiện tìm kiếm
-            if (searchText) {
-                params.search = searchText;
-            }
-
-            const response = await itemServices.getItems(params);
-            console.log(response);
+            const response = await itemServices.getItems(params, { search: searchText || '' });
             if (response.status === 200) {
                 const rawData = response.data.items;
                 setData(rawData);
@@ -66,21 +55,28 @@ function ItemList() {
                     const keys = Object.keys(rawData[0]).filter(
                         (key) => key !== 'instock' && key !== 'picture' && key !== 'id_shop',
                     );
-                    const dynamicColumns = keys.map((key) => ({
-                        title: key.charAt(0).toUpperCase() + key.slice(1),
-                        dataIndex: key,
-                        key: key,
-                        filters:
-                            key === 'status'
-                                ? [
-                                      { text: 'Active', value: 'active' },
-                                      { text: 'Inactive', value: 'inactive' },
-                                  ]
-                                : null,
-                        onFilter: key === 'status' ? (value, record) => record[key] === value : null,
-                        render: key === 'created_at' ? (text) => dayjs(text).format('HH:mm:ss DD-MM-YYYY') : undefined,
-                        ...getColumnSearchProps(key),
-                    }));
+                    const dynamicColumns = keys.map((key) => {
+                        let column = {
+                            title: key.charAt(0).toUpperCase() + key.slice(1),
+                            dataIndex: key,
+                            key: key,
+                        };
+
+                        if (key === 'id_item' || key === 'name') {
+                            column = { ...column, ...getColumnSearchProps(key) };
+                        } else if (key === 'status') {
+                            column.filters = [
+                                { text: 'Active', value: 'active' },
+                                { text: 'Inactive', value: 'inactive' },
+                            ];
+                            column.onFilter = (value, record) => record.status === value;
+                        } else if (key === 'created_at') {
+                            column.render = (text) => dayjs(text).format('HH:mm:ss DD-MM-YYYY');
+                        }
+
+                        return column;
+                    });
+
                     setColumns(dynamicColumns);
                 }
             }
@@ -121,27 +117,21 @@ function ItemList() {
         filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
         onFilter: (value, record) =>
             record[dataIndex] ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()) : '',
-        onFilterDropdownVisibleChange: (visible) => {
+        onFilterDropdownOpenChange: (visible) => {
             if (visible) {
                 setTimeout(() => searchInput.current.select(), 100);
             }
         },
-        render: (text) =>
-            searchedColumn === dataIndex ? (
-                <Highlighter
-                    highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
-                    searchWords={[searchText]}
-                    autoEscape
-                    textToHighlight={text ? text.toString() : ''}
-                />
-            ) : (
-                text
-            ),
     });
 
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
         setSearchText(selectedKeys[0]);
+        if (dataIndex === 'name' || dataIndex === 'id_item') {
+            // Xây dựng chuỗi tìm kiếm theo name
+            const query = `item.${dataIndex} like '%${selectedKeys[0]}%'`;
+            setSearchText(query);
+        }
         setSearchedColumn(dataIndex);
     };
 
@@ -159,8 +149,6 @@ function ItemList() {
         return <Loading />;
     }
 
-    console.log('data:', data);
-
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container')}>
@@ -173,20 +161,11 @@ function ItemList() {
                         onClick: () => goToItemDetail(record.id_item),
                     })}
                     scroll={{ x: 'max-content' }}
-                    onChange={(pagination, filters, sorter) => {
+                    onChange={(pagination, filters) => {
                         if (filters.status) {
                             setFilterStatus(filters.status[0]);
                         } else {
                             setFilterStatus(null);
-                        }
-                        if (sorter.order) {
-                            setColumns((prevColumns) =>
-                                prevColumns.map((col) => ({
-                                    ...col,
-                                    sorter: col.dataIndex === sorter.field,
-                                    sortOrder: col.dataIndex === sorter.field ? sorter.order : null,
-                                }))
-                            );
                         }
                     }}
                     rowClassName={() => cx('pointer')}

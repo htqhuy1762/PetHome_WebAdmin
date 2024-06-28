@@ -1,8 +1,16 @@
 import * as httpRequestPetHome from '~/utils/httpRequestPetHome';
 
-export const getServices = async (data) => {
+export const getServices = async (dataQuery, dataBody) => {
     try {
-        const response = await httpRequestPetHome.get('/services', { params: data });
+        const response = await httpRequestPetHome.post(
+            `/services?start=${dataQuery.start}&limit=${dataQuery.limit}&status=${dataQuery.status}`,
+            dataBody,
+            {
+                Headers: {
+                    'Content-Type': 'application/json',
+                },
+            },
+        );
         return response;
     } catch (error) {
         return error.response;

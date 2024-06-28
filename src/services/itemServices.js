@@ -1,8 +1,16 @@
 import * as httpRequestPetHome from '~/utils/httpRequestPetHome';
 
-export const getItems = async (data) => {
+export const getItems = async (dataQuery, dataBody) => {
     try {
-        const response = await httpRequestPetHome.get('/items', { params: data });
+        const response = await httpRequestPetHome.post(
+            `/items?start=${dataQuery.start}&limit=${dataQuery.limit}&status=${dataQuery.status}`,
+            dataBody,
+            {
+                Headers: {
+                    'Content-Type': 'application/json',
+                },
+            },
+        );
         return response;
     } catch (error) {
         return error.response;
@@ -18,11 +26,11 @@ export const getItemDetailById = async (id) => {
     }
 };
 
-export const updateStatusItem = async (id, dataStatus, dataSearch) => {
+export const updateStatusItem = async (id, data) => {
     try {
-        const response = await httpRequestPetHome.put(`/items/${id}?status=${dataStatus}&search=${dataSearch}`);
+        const response = await httpRequestPetHome.put(`/items/${id}?status=${data}`);
         return response;
     } catch (error) {
         return error.response;
     }
-}
+};

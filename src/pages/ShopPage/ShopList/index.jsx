@@ -1,9 +1,10 @@
 import classNames from 'classnames/bind';
 import styles from './ShopList.module.scss';
 import * as shopServices from '~/services/shopServices';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Loading from '~/components/Loading';
-import { Pagination, Table, Button, message } from 'antd';
+import { Pagination, Table, Button, message, Input, Space } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
@@ -19,10 +20,13 @@ function ShopList() {
     const limit = 15; // Số lượng mục trên mỗi trang
     const [total, setTotal] = useState(0);
     const [filterStatus, setFilterStatus] = useState(null);
+    const [searchText, setSearchText] = useState('');
+    const [searchedColumn, setSearchedColumn] = useState('');
+    const searchInput = useRef(null);
 
     useEffect(() => {
         fetchData();
-    }, [currentPage, filterStatus]);
+    }, [currentPage, filterStatus, searchText, searchedColumn]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -32,17 +36,13 @@ function ShopList() {
 
             // Xử lý khi có filterStatus
             if (filterStatus !== null) {
-                if (Array.isArray(filterStatus)) {
-                    params.status = filterStatus.map((status) => `'${status}'`).join(',');
-                } else {
-                    params.status = `'${filterStatus}'`;
-                }
+                params.status = `'${filterStatus}'`;
             } else {
                 // Nếu không có filterStatus, mặc định lấy active và inactive
                 params.status = "'active','inactive'";
             }
 
-            const response = await shopServices.getShops(params);
+            const response = await shopServices.getShops(params, { search: searchText || '' });
             console.log(response);
             if (response.status === 200) {
                 const rawData = response.data.shops;
@@ -65,6 +65,10 @@ function ShopList() {
                                 { text: 'Inactive', value: 'inactive' },
                             ];
                             column.onFilter = (value, record) => record[key] === value;
+                        }
+
+                        if (key === 'id_shop' || key === 'name') {
+                            column = { ...column, ...getColumnSearchProps(key) };
                         }
 
                         if (key === 'created_at') {
@@ -124,6 +128,60 @@ function ShopList() {
             message.error('Cập nhật trạng thái thất bại');
             console.error('Error updating status:', error);
         }
+    };
+
+    const getColumnSearchProps = (dataIndex) => ({
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+            <div style={{ padding: 8 }}>
+                <Input
+                    ref={searchInput}
+                    placeholder={`Search ${dataIndex}`}
+                    value={selectedKeys[0]}
+                    onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                    onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                    style={{ marginBottom: 8, display: 'block' }}
+                />
+                <Space>
+                    <Button
+                        type="primary"
+                        onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                        icon={<SearchOutlined />}
+                        size="small"
+                        style={{ width: 90 }}
+                    >
+                        Search
+                    </Button>
+                    <Button onClick={() => handleReset(clearFilters)} size="small" style={{ width: 90 }}>
+                        Reset
+                    </Button>
+                </Space>
+            </div>
+        ),
+        filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+        onFilter: (value, record) =>
+            record[dataIndex] ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()) : '',
+        onFilterDropdownOpenChange: (visible) => {
+            if (visible) {
+                setTimeout(() => searchInput.current.select(), 100);
+            }
+        },
+    });
+
+    const handleSearch = (selectedKeys, confirm, dataIndex) => {
+        confirm();
+        setSearchText(selectedKeys[0]);
+        if (dataIndex === 'name' || dataIndex === 'id_shop') {
+            // Xây dựng chuỗi tìm kiếm theo name
+            const query = `shop.${dataIndex} like '%${selectedKeys[0]}%'`;
+            setSearchText(query);
+        }
+        setSearchedColumn(dataIndex);
+    };
+
+    const handleReset = (clearFilters) => {
+        clearFilters();
+        setSearchText('');
+        setSearchedColumn('');
     };
 
     if (loading) {

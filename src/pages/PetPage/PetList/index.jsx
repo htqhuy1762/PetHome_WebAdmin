@@ -45,7 +45,7 @@ function PetList() {
             }
 
             const response = await petServices.getPets(params, { search: searchText || '' });
-            console.log(response);
+            
             if (response.status === 200) {
                 const rawData = response.data.pets;
                 setData(rawData);
@@ -148,8 +148,6 @@ function PetList() {
     if (loading) {
         return <Loading />;
     }
-
-    console.log('data:', data);
 
     return (
         <div className={cx('wrapper')}>

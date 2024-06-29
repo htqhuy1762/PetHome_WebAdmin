@@ -60,8 +60,6 @@ function ItemDetail() {
         }
     };
 
-    console.log(itemData);
-
     return itemData ? (
         <div className={cx('wrapper')}>
             <div className={cx('item-detail-left')}>

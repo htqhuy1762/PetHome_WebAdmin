@@ -60,8 +60,6 @@ function ServiceDetail() {
         }
     };
 
-    console.log(serviceData);
-
     return serviceData ? (
         <div className={cx('wrapper')}>
             <div className={cx('service-detail-left')}>

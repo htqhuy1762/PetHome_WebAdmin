@@ -132,8 +132,6 @@ function ServiceRpTicket() {
         return <Loading />;
     }
 
-    console.log('data:', data);
-
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container')}>

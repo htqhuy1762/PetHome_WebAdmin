@@ -59,7 +59,6 @@ function PetDetail() {
             message.error('Cập nhật trạng thái thất bại');
         }
     };
-    console.log(petData);
 
     return petData ? (
         <div className={cx('wrapper')}>

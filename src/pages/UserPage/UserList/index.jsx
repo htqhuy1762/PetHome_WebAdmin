@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
-import styles from './ShopRpTicket.module.scss';
-import * as shopServices from '~/services/shopServices';
+import styles from './UserList.module.scss';
+import * as userServices from '~/services/userServices';
 import { useEffect, useState, useRef } from 'react';
 import Loading from '~/components/Loading';
 import { Pagination, Table, Button, message, Input, Space } from 'antd';
@@ -12,32 +12,39 @@ dayjs.extend(utc);
 
 const cx = classNames.bind(styles);
 
-function ShopRpTicket() {
+function UserList() {
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState([]);
     const [columns, setColumns] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const limit = 15; // Số lượng mục trên mỗi trang
     const [total, setTotal] = useState(0);
+    const [filterStatus, setFilterStatus] = useState(null);
     const [searchText, setSearchText] = useState('');
     const [searchedColumn, setSearchedColumn] = useState('');
     const searchInput = useRef(null);
 
-
     useEffect(() => {
         fetchData();
-    }, [currentPage, searchText, searchedColumn]);
+    }, [currentPage, filterStatus, searchText, searchedColumn]);
 
     const fetchData = async () => {
         setLoading(true);
         try {
             const start = (currentPage - 1) * limit;
-            const params = { start, limit, status: "'requested'" };
+            let params = { start, limit };
 
-            const response = await shopServices.getShops(params, { search: searchText || '' });
-            
+            // Xử lý khi có filterStatus
+            if (filterStatus !== null) {
+                params.status = `'${filterStatus}'`;
+            } else {
+                // Nếu không có filterStatus, mặc định lấy active và inactive
+                params.status = "'active','inactive'";
+            }
+
+            const response = await userServices.getUsers(params, { search: searchText || '' });
             if (response.status === 200) {
-                const rawData = response.data.shops;
+                const rawData = response.data.users;
                 setData(rawData);
                 setTotal(response.data.count);
 
@@ -51,18 +58,26 @@ function ShopRpTicket() {
                             key: key,
                         };
 
-                        if (key === 'created_at') {
-                            column.render = (text) => dayjs(text).format('HH:mm:ss DD-MM-YYYY');
+                        if (key === 'status') {
+                            column.filters = [
+                                { text: 'Active', value: 'active' },
+                                { text: 'Inactive', value: 'inactive' },
+                            ];
+                            column.onFilter = (value, record) => record[key] === value;
                         }
 
-                        if (key === 'id_shop' || key === 'name') {
+                        if (key === 'id_user' || key === 'name') {
                             column = { ...column, ...getColumnSearchProps(key) };
                         }
 
-                        if (key === 'logo' || key === 'back_photo' || key === 'front_photo') {
+                        if (key === 'day_of_birth') {
+                            column.render = (text) => dayjs(text).format('DD-MM-YYYY');
+                        }
+
+                        if (key === 'avatar') {
                             column.render = (text) => (
                                 <a href={text} target="_blank" rel="noopener noreferrer">
-                                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                                    {text}
                                 </a>
                             );
                         }
@@ -79,18 +94,14 @@ function ShopRpTicket() {
                         render: (_, record) => (
                             <>
                                 <Button
-                                    className={cx('action-button', 'active')}
-                                    onClick={() => handleUpdateStatus(record.id_shop, 'active')}
+                                    className={cx('action-button', {
+                                        active: record.status === 'inactive',
+                                        inactive: record.status === 'active',
+                                    })}
+                                    onClick={() => handleUpdateStatus(record)}
                                     type="primary"
                                 >
-                                    Approve
-                                </Button>
-                                <Button
-                                    className={cx('action-button', 'inactive')}
-                                    onClick={() => handleUpdateStatus(record.id_shop, 'inactive')}
-                                    type="primary"
-                                >
-                                    Deny
+                                    {record.status === 'active' ? 'Inactive' : 'Active'}
                                 </Button>
                             </>
                         ),
@@ -106,9 +117,10 @@ function ShopRpTicket() {
         }
     };
 
-    const handleUpdateStatus = async (id, data) => {
+    const handleUpdateStatus = async (record) => {
+        const newStatus = record.status === 'active' ? 'inactive' : 'active';
         try {
-            await shopServices.updateStatusShop(id, data);
+            await userServices.updateStatusUser(record.id_user, newStatus);
             message.success('Cập nhật trạng thái thành công');
             fetchData(); // Gọi lại fetchData để cập nhật bảng
         } catch (error) {
@@ -157,9 +169,9 @@ function ShopRpTicket() {
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
         setSearchText(selectedKeys[0]);
-        if (dataIndex === 'name' || dataIndex === 'id_shop') {
+        if (dataIndex === 'name' || dataIndex === 'id_user') {
             // Xây dựng chuỗi tìm kiếm theo name
-            const query = `shop.${dataIndex} like '%${selectedKeys[0]}%'`;
+            const query = `user_client.${dataIndex} like '%${selectedKeys[0]}%'`;
             setSearchText(query);
         }
         setSearchedColumn(dataIndex);
@@ -171,7 +183,6 @@ function ShopRpTicket() {
         setSearchedColumn('');
     };
 
-
     if (loading) {
         return <Loading />;
     }
@@ -182,9 +193,16 @@ function ShopRpTicket() {
                 <Table
                     columns={columns}
                     dataSource={data}
-                    pagination={false}
-                    rowKey="id_shop"
+                    pagination={false} // Để sử dụng pagination của Table của Ant Design, cài đặt tùy chỉnh bên dưới
+                    rowKey="id_user"
                     scroll={{ x: 'max-content' }}
+                    onChange={(pagination, filters) => {
+                        if (filters.status) {
+                            setFilterStatus(filters.status[0]);
+                        } else {
+                            setFilterStatus(null);
+                        }
+                    }}
                     rowClassName={() => cx('pointer')}
                 />
                 <div className={cx('pagination-container')}>
@@ -204,4 +222,4 @@ function ShopRpTicket() {
     );
 }
 
-export default ShopRpTicket;
+export default UserList;

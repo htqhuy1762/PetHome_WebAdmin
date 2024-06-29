@@ -46,7 +46,7 @@ function ServiceList() {
             }
 
             const response = await servicePetServices.getServices(params, { search: searchText || '' });
-            console.log(response);
+            
             if (response.status === 200) {
                 const rawData = response.data.services;
                 setData(rawData);
@@ -150,7 +150,6 @@ function ServiceList() {
         return <Loading />;
     }
 
-    console.log('data:', data);
 
     return (
         <div className={cx('wrapper')}>

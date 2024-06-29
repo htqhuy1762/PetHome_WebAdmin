@@ -43,7 +43,7 @@ function ShopList() {
             }
 
             const response = await shopServices.getShops(params, { search: searchText || '' });
-            console.log(response);
+
             if (response.status === 200) {
                 const rawData = response.data.shops;
                 setData(rawData);
@@ -78,7 +78,7 @@ function ShopList() {
                         if (key === 'logo' || key === 'back_photo' || key === 'front_photo') {
                             column.render = (text) => (
                                 <a href={text} target="_blank" rel="noopener noreferrer">
-                                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                                    {text}
                                 </a>
                             );
                         }
@@ -187,8 +187,6 @@ function ShopList() {
     if (loading) {
         return <Loading />;
     }
-
-    console.log('data:', data);
 
     return (
         <div className={cx('wrapper')}>

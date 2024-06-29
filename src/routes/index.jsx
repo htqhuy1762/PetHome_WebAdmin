@@ -10,6 +10,8 @@ import ServiceRpTicket from '~/pages/ServicePage/ServiceRpTicket';
 import ServiceDetail from '~/pages/ServicePage/ServiceDetail';
 import ShopList from '~/pages/ShopPage/ShopList';
 import ShopRpTicket from '~/pages/ShopPage/ShopRpTicket';
+import UserList from '~/pages/UserPage/UserList';
+import Payment from '~/pages/SystemPage/Payment';
 
 const publicRoutes = [
     { path: '/', component: PetRpTicket },
@@ -17,13 +19,15 @@ const publicRoutes = [
     { path: '/items/:id', component: ItemDetail },
     { path: '/pet/list', component: PetList },
     { path: '/pets/:id', component: PetDetail },
-    { path: '/item/report', component: ItemRpTicket },
-    { path: '/pet/report', component: PetRpTicket },
+    { path: '/item/request', component: ItemRpTicket },
+    { path: '/pet/request', component: PetRpTicket },
     { path: '/service/list', component: ServiceList },
-    { path: '/service/report', component: ServiceRpTicket },
+    { path: '/service/request', component: ServiceRpTicket },
     { path: '/services/:id', component: ServiceDetail },
     { path: '/shop/list', component: ShopList },
-    { path: '/shop/report', component: ShopRpTicket },
+    { path: '/shop/request', component: ShopRpTicket },
+    { path: '/user/list', component: UserList },
+    { path: '/system/payment', component: Payment },
 ];
 
 export { publicRoutes };

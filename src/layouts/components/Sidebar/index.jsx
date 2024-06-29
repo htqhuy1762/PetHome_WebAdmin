@@ -19,7 +19,7 @@ function Sidebar() {
             key: '1',
             label: 'Pet Management',
             children: [
-                { key: '/pet/report', label: <a href="/pet/report">Request Tickets</a> },
+                { key: '/pet/request', label: <a href="/pet/request">Request Tickets</a> },
                 { key: '/pet/list', label: <a href="/pet/list">List of Pets</a> },
             ],
         },
@@ -27,7 +27,7 @@ function Sidebar() {
             key: '2',
             label: 'Item Management',
             children: [
-                { key: '/item/report', label: <a href="/item/report">Request Tickets</a> },
+                { key: '/item/request', label: <a href="/item/request">Request Tickets</a> },
                 { key: '/item/list', label: <a href="/item/list">List of Items</a> },
             ],
         },
@@ -35,7 +35,7 @@ function Sidebar() {
             key: '3',
             label: 'Service Management',
             children: [
-                { key: '/service/report', label: <a href="/service/report">Request Tickets</a> },
+                { key: '/service/request', label: <a href="/service/request">Request Tickets</a> },
                 { key: '/service/list', label: <a href="/service/list">List of Services</a> },
             ],
         },
@@ -43,12 +43,19 @@ function Sidebar() {
             key: '4',
             label: 'Shop Management',
             children: [
-                { key: '/shop/report', label: <a href="/shop/report">Request Tickets</a> },
+                { key: '/shop/request', label: <a href="/shop/request">Request Tickets</a> },
                 { key: '/shop/list', label: <a href="/shop/list">List of Shops</a> },
             ],
         },
         {
             key: '5',
+            label: 'User Management',
+            children: [
+                { key: '/user/list', label: <a href="/user/list">List of Users</a> },
+            ],
+        },
+        {
+            key: '6',
             label: 'System Management',
             children: [
                 { key: '/system/payment', label: <a href="/system/payment">Payment</a> },
@@ -64,7 +71,7 @@ function Sidebar() {
                 defaultOpenKeys={items.map((item) => item.key)}
                 mode="inline"
                 items={items}
-                selectedKeys={[selectedKey === '/' ? '/pet/report' : selectedKey]}
+                selectedKeys={[selectedKey === '/' ? '/pet/request' : selectedKey]}
             />
         </div>
     );

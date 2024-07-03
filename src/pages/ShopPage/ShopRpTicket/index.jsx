@@ -23,7 +23,6 @@ function ShopRpTicket() {
     const [searchedColumn, setSearchedColumn] = useState('');
     const searchInput = useRef(null);
 
-
     useEffect(() => {
         fetchData();
     }, [currentPage, searchText, searchedColumn]);
@@ -35,7 +34,7 @@ function ShopRpTicket() {
             const params = { start, limit, status: "'requested'" };
 
             const response = await shopServices.getShops(params, { search: searchText || '' });
-            
+
             if (response.status === 200) {
                 const rawData = response.data.shops;
                 setData(rawData);
@@ -62,7 +61,7 @@ function ShopRpTicket() {
                         if (key === 'logo' || key === 'back_photo' || key === 'front_photo') {
                             column.render = (text) => (
                                 <a href={text} target="_blank" rel="noopener noreferrer">
-                                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                                    {text}
                                 </a>
                             );
                         }
@@ -170,7 +169,6 @@ function ShopRpTicket() {
         setSearchText('');
         setSearchedColumn('');
     };
-
 
     if (loading) {
         return <Loading />;

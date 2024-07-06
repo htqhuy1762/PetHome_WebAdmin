@@ -52,7 +52,7 @@ function ItemRpTicket() {
                             key: key,
                         };
 
-                        if (key === 'id_item' || key === 'name') {
+                        if (key === 'id_item' || key === 'name' || key === 'shop_name') {
                             column = { ...column, ...getColumnSearchProps(key) };
                         } else if (key === 'created_at') {
                             column.render = (text) => dayjs(text).format('HH:mm:ss DD-MM-YYYY');
@@ -110,7 +110,7 @@ function ItemRpTicket() {
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
         setSearchText(selectedKeys[0]);
-        if (dataIndex === 'name' || dataIndex === 'id_item') {
+        if (dataIndex === 'name' || dataIndex === 'id_item' || dataIndex === 'shop_name') {
             // Xây dựng chuỗi tìm kiếm theo name
             const query = `item.${dataIndex} like '%${selectedKeys[0]}%'`;
             setSearchText(query);

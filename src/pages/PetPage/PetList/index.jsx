@@ -63,7 +63,7 @@ function PetList() {
                             key: key,
                         };
 
-                        if (key === 'id_pet' || key === 'name') {
+                        if (key === 'id_pet' || key === 'name' || key === 'shop_name') {
                             column = { ...column, ...getColumnSearchProps(key) };
                         } else if (key === 'status') {
                             column.filters = [
@@ -127,7 +127,7 @@ function PetList() {
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
         setSearchText(selectedKeys[0]);
-        if (dataIndex === 'name' || dataIndex === 'id_pet') {
+        if (dataIndex === 'name' || dataIndex === 'id_pet' || dataIndex === 'shop_name') {
             // Xây dựng chuỗi tìm kiếm theo name
             const query = `pet.${dataIndex} like '%${selectedKeys[0]}%'`;
             setSearchText(query);

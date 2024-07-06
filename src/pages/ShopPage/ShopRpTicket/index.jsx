@@ -61,7 +61,7 @@ function ShopRpTicket() {
                         if (key === 'logo' || key === 'back_photo' || key === 'front_photo') {
                             column.render = (text) => (
                                 <a href={text} target="_blank" rel="noopener noreferrer">
-                                    {text}
+                                    {key.charAt(0).toUpperCase() + key.slice(1)}
                                 </a>
                             );
                         }

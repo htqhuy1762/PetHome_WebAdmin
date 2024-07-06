@@ -52,7 +52,7 @@ function ServiceRpTicket() {
                             key: key,
                         };
 
-                        if (key === 'id_service' || key === 'name') {
+                        if (key === 'id_service' || key === 'name' || key === 'shop_name') {
                             column = { ...column, ...getColumnSearchProps(key) };
                         } else if (key === 'created_at') {
                             column.render = (text) => dayjs(text).format('HH:mm:ss DD-MM-YYYY');
@@ -110,7 +110,7 @@ function ServiceRpTicket() {
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
         setSearchText(selectedKeys[0]);
-        if (dataIndex === 'name' || dataIndex === 'id_service') {
+        if (dataIndex === 'name' || dataIndex === 'id_service' || dataIndex === 'shop_name') {
             // Xây dựng chuỗi tìm kiếm theo name
             const query = `service.${dataIndex} like '%${selectedKeys[0]}%'`;
             setSearchText(query);

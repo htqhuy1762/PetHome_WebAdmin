@@ -25,3 +25,17 @@ export const updateStatusUser = async (id, data) => {
         return error.response;
     }
 };
+
+export const sendNotification = async (data) => {
+    try {
+        const response = await httpRequestPetHome.post('/notifications', data, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+};
+

@@ -3,7 +3,7 @@ import styles from './UserList.module.scss';
 import * as userServices from '~/services/userServices';
 import { useEffect, useState, useRef } from 'react';
 import Loading from '~/components/Loading';
-import { Pagination, Table, Button, message, Input, Space } from 'antd';
+import { Pagination, Table, Button, message, Input, Space, Modal } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -23,10 +23,27 @@ function UserList() {
     const [searchText, setSearchText] = useState('');
     const [searchedColumn, setSearchedColumn] = useState('');
     const searchInput = useRef(null);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [notificationIdUser, setNotificationIdUser] = useState(null);
+    const [notificationTitle, setNotificationTitle] = useState('');
+    const [notificationMessage, setNotificationMessage] = useState('');
+    const [notificationUserName, setNotificationUserName] = useState('');
 
     useEffect(() => {
         fetchData();
     }, [currentPage, filterStatus, searchText, searchedColumn]);
+
+    const showNotificationModal = (idUser, userName) => {
+        setNotificationIdUser(idUser);
+        setNotificationUserName(userName);
+        setIsModalVisible(true);
+    };
+
+    const handleCancel = () => {
+        setIsModalVisible(false);
+        setNotificationTitle('');
+        setNotificationMessage('');
+    };
 
     const fetchData = async () => {
         setLoading(true);
@@ -103,6 +120,14 @@ function UserList() {
                                 >
                                     {record.status === 'active' ? 'Inactive' : 'Active'}
                                 </Button>
+
+                                <Button
+                                    style={{ marginLeft: 8 }}
+                                    onClick={() => showNotificationModal(record.id_user, record.name)}
+                                    type="primary"
+                                >
+                                    Gửi thông báo
+                                </Button>
                             </>
                         ),
                     });
@@ -126,6 +151,25 @@ function UserList() {
         } catch (error) {
             message.error('Cập nhật trạng thái thất bại');
             console.error('Error updating status:', error);
+        }
+    };
+
+    const handleSendNotification = async () => {
+        try {
+            const formData = new FormData();
+            formData.append('id_user', notificationIdUser);
+            formData.append('title', notificationTitle);
+            formData.append('message', notificationMessage);
+
+            const response = await userServices.sendNotification(formData);
+            
+            if (response.status === 200) {
+                message.success('Gửi thông báo thành công');
+                handleCancel();
+            }
+        } catch (error) {
+            message.error('Gửi thông báo thất bại');
+            console.error('Error sending notification:', error);
         }
     };
 
@@ -218,6 +262,33 @@ function UserList() {
                     />
                 </div>
             </div>
+
+            <Modal
+                title={`Gửi thông báo đến: ${notificationUserName}`}
+                open={isModalVisible}
+                onCancel={handleCancel}
+                footer={[
+                    <Button key="back" onClick={handleCancel}>
+                        Hủy
+                    </Button>,
+                    <Button key="submit" type="primary" onClick={handleSendNotification}>
+                        Gửi
+                    </Button>,
+                ]}
+            >
+                <Input
+                    placeholder="Tiêu đề"
+                    value={notificationTitle}
+                    onChange={(e) => setNotificationTitle(e.target.value)}
+                    style={{ marginBottom: 8 }}
+                />
+                <Input.TextArea
+                    placeholder="Nội dung"
+                    value={notificationMessage}
+                    onChange={(e) => setNotificationMessage(e.target.value)}
+                    rows={4}
+                />
+            </Modal>
         </div>
     );
 }

@@ -12,7 +12,6 @@ import ShopList from '~/pages/ShopPage/ShopList';
 import ShopRpTicket from '~/pages/ShopPage/ShopRpTicket';
 import UserList from '~/pages/UserPage/UserList';
 import Payment from '~/pages/SystemPage/Payment';
-import SendNotification from '~/pages/NotificationPage/SendNotification';
 
 const publicRoutes = [
     { path: '/', component: PetRpTicket },
@@ -29,7 +28,6 @@ const publicRoutes = [
     { path: '/shop/request', component: ShopRpTicket },
     { path: '/user/list', component: UserList },
     { path: '/system/payment', component: Payment },
-    { path: '/notification/send', component: SendNotification },
 ];
 
 export { publicRoutes };

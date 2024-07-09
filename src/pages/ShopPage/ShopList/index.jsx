@@ -3,10 +3,12 @@ import styles from './ShopList.module.scss';
 import * as shopServices from '~/services/shopServices';
 import { useEffect, useState, useRef } from 'react';
 import Loading from '~/components/Loading';
-import { Pagination, Table, Button, message, Input, Space } from 'antd';
+import { Pagination, Table, Button, message, Input, Space, Modal, Tabs } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import PendingBills from './PendingBills';
+import ProcessedBills from './ProcessedBills';
 
 dayjs.extend(utc);
 
@@ -23,6 +25,25 @@ function ShopList() {
     const [searchText, setSearchText] = useState('');
     const [searchedColumn, setSearchedColumn] = useState('');
     const searchInput = useRef(null);
+
+    const [visibleModal, setVisibleModal] = useState(false);
+    const [selectedIdShop, setSelectedIdShop] = useState(null);
+    const [isProcessed, setIsProcessed] = useState(false);
+
+    const items = [
+        {
+            key: '1',
+            label: 'Chưa xử lý',
+            children: (
+                <PendingBills shopId={selectedIdShop} isProcessed={isProcessed} setIsProcessed={setIsProcessed} />
+            ),
+        },
+        {
+            key: '2',
+            label: 'Đã xử lý',
+            children: <ProcessedBills shopId={selectedIdShop} isProcessed={isProcessed} />,
+        },
+    ];
 
     useEffect(() => {
         fetchData();
@@ -104,6 +125,17 @@ function ShopList() {
                                 >
                                     {record.status === 'active' ? 'Inactive' : 'Active'}
                                 </Button>
+
+                                <Button
+                                    className={cx('action-button')}
+                                    onClick={() => {
+                                        setSelectedIdShop(record.id_shop);
+                                        setVisibleModal(true);
+                                    }}
+                                    type="primary"
+                                >
+                                    Xem đơn mua
+                                </Button>
                             </>
                         ),
                     });
@@ -184,6 +216,11 @@ function ShopList() {
         setSearchedColumn('');
     };
 
+    const handleCancelModal = () => {
+        setSelectedIdShop(null);
+        setVisibleModal(false);
+    };
+
     if (loading) {
         return <Loading />;
     }
@@ -219,6 +256,16 @@ function ShopList() {
                     />
                 </div>
             </div>
+            <Modal
+                title="Danh sách đơn mua"
+                open={visibleModal}
+                onOk={handleCancelModal}
+                onCancel={handleCancelModal}
+                defaultActiveKey="1"
+                width={1200}
+            >
+                <Tabs items={items} />
+            </Modal>
         </div>
     );
 }

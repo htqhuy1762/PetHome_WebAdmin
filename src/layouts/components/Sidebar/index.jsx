@@ -62,13 +62,6 @@ function Sidebar() {
                 { key: '/system/type', label: <a href="/system/type">Item, Service, Pet Type</a> },
             ],
         },
-        {
-            key: '7',
-            label: 'Notification Management',
-            children: [
-                { key: '/notification/send', label: <a href="/notification/send">Send Notification</a> },
-            ],
-        },
     ];
 
     return (

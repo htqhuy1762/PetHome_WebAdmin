@@ -128,9 +128,14 @@ function ServiceList() {
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
         setSearchText(selectedKeys[0]);
-        if (dataIndex === 'name' || dataIndex === 'id_service' || dataIndex === 'shop_name') {
+        if (dataIndex === 'name' || dataIndex === 'id_service') {
             // Xây dựng chuỗi tìm kiếm theo name
             const query = `service.${dataIndex} like '%${selectedKeys[0]}%'`;
+            setSearchText(query);
+        }
+        else if (dataIndex === 'shop_name') {
+            // Xây dựng chuỗi tìm kiếm theo shop_name
+            const query = `shop.name like '%${selectedKeys[0]}%'`;
             setSearchText(query);
         }
         setSearchedColumn(dataIndex);

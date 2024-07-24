@@ -4,7 +4,7 @@ import * as servicePetServices from '~/services/servicePetServices';
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Loading from '~/components/Loading';
-import { Pagination, Table, Input, Button, Space } from 'antd';
+import { Pagination, Table, Input, Button, Space, Tooltip } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -26,7 +26,6 @@ function ServiceList() {
     const [searchedColumn, setSearchedColumn] = useState('');
     const searchInput = useRef(null);
 
-
     useEffect(() => {
         fetchData();
     }, [currentPage, filterStatus, searchText, searchedColumn]);
@@ -46,7 +45,7 @@ function ServiceList() {
             }
 
             const response = await servicePetServices.getServices(params, { search: searchText || '' });
-            
+
             if (response.status === 200) {
                 const rawData = response.data.services;
                 setData(rawData);
@@ -55,7 +54,11 @@ function ServiceList() {
                 // Tạo các cột động từ dữ liệu
                 if (rawData.length > 0) {
                     const keys = Object.keys(rawData[0]).filter(
-                        (key) => key !== 'picture' && key !== 'id_shop' && key !== 'id_service_type_detail',
+                        (key) =>
+                            key !== 'picture' &&
+                            key !== 'id_shop' &&
+                            key !== 'id_service_type_detail' &&
+                            key !== 'count',
                     );
                     const dynamicColumns = keys.map((key) => {
                         let column = {
@@ -63,6 +66,12 @@ function ServiceList() {
                             dataIndex: key,
                             key: key,
                         };
+
+                        if (key === 'id_service') {
+                            column.render = (text) => (
+                                <Tooltip title={text}>{text.length > 9 ? `${text.slice(0, 9)}...` : text}</Tooltip>
+                            );
+                        }
 
                         if (key === 'id_service' || key === 'name' || key === 'shop_name') {
                             column = { ...column, ...getColumnSearchProps(key) };
@@ -132,8 +141,7 @@ function ServiceList() {
             // Xây dựng chuỗi tìm kiếm theo name
             const query = `service.${dataIndex} like '%${selectedKeys[0]}%'`;
             setSearchText(query);
-        }
-        else if (dataIndex === 'shop_name') {
+        } else if (dataIndex === 'shop_name') {
             // Xây dựng chuỗi tìm kiếm theo shop_name
             const query = `shop.name like '%${selectedKeys[0]}%'`;
             setSearchText(query);
@@ -154,7 +162,6 @@ function ServiceList() {
     if (loading) {
         return <Loading />;
     }
-
 
     return (
         <div className={cx('wrapper')}>

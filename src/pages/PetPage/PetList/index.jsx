@@ -4,7 +4,7 @@ import * as petServices from '~/services/petServices';
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Loading from '~/components/Loading';
-import { Pagination, Table, Input, Button, Space } from 'antd';
+import { Pagination, Table, Input, Button, Space, Tooltip } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -45,7 +45,7 @@ function PetList() {
             }
 
             const response = await petServices.getPets(params, { search: searchText || '' });
-            
+
             if (response.status === 200) {
                 const rawData = response.data.pets;
                 setData(rawData);
@@ -54,7 +54,7 @@ function PetList() {
                 // Tạo các cột động từ dữ liệu
                 if (rawData.length > 0) {
                     const keys = Object.keys(rawData[0]).filter(
-                        (key) => key !== 'instock' && key !== 'picture' && key !== 'id_shop',
+                        (key) => key !== 'instock' && key !== 'picture' && key !== 'id_shop' && key !== 'count',
                     );
                     const dynamicColumns = keys.map((key) => {
                         let column = {
@@ -63,15 +63,22 @@ function PetList() {
                             key: key,
                         };
 
+                        if (key === 'id_pet') {
+                            column.render = (text) => (
+                                <Tooltip title={text}>{text.length > 9 ? `${text.slice(0, 9)}...` : text}</Tooltip>
+                            );
+                        }
                         if (key === 'id_pet' || key === 'name' || key === 'shop_name') {
                             column = { ...column, ...getColumnSearchProps(key) };
-                        } else if (key === 'status') {
+                        }
+                        if (key === 'status') {
                             column.filters = [
                                 { text: 'Active', value: 'active' },
                                 { text: 'Inactive', value: 'inactive' },
                             ];
                             column.onFilter = (value, record) => record.status === value;
-                        } else if (key === 'created_at') {
+                        }
+                        if (key === 'created_at') {
                             column.render = (text) => dayjs(text).format('HH:mm:ss DD-MM-YYYY');
                         }
 
@@ -131,8 +138,7 @@ function PetList() {
             // Xây dựng chuỗi tìm kiếm theo name
             const query = `pet.${dataIndex} like '%${selectedKeys[0]}%'`;
             setSearchText(query);
-        }
-        else if (dataIndex === 'shop_name') {
+        } else if (dataIndex === 'shop_name') {
             // Xây dựng chuỗi tìm kiếm theo shop_name
             const query = `shop.name like '%${selectedKeys[0]}%'`;
             setSearchText(query);

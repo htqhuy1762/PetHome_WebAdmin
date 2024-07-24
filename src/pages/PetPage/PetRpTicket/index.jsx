@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from 'react';
 import { SearchOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import Loading from '~/components/Loading';
-import { Pagination, Table, Space, Button, Input } from 'antd';
+import { Pagination, Table, Space, Button, Input, Tooltip } from 'antd';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
@@ -43,7 +43,7 @@ function PetRpTicket() {
                 // Tạo các cột động từ dữ liệu
                 if (rawData.length > 0) {
                     const keys = Object.keys(rawData[0]).filter(
-                        (key) => key !== 'instock' && key !== 'picture' && key !== 'id_shop',
+                        (key) => key !== 'instock' && key !== 'picture' && key !== 'id_shop' && key !== 'count',
                     );
                     const dynamicColumns = keys.map((key) => {
                         let column = {
@@ -52,6 +52,11 @@ function PetRpTicket() {
                             key: key,
                         };
 
+                        if (key === 'id_pet') {
+                            column.render = (text) => (
+                                <Tooltip title={text}>{text.length > 9 ? `${text.slice(0, 9)}...` : text}</Tooltip>
+                            );
+                        }
                         if (key === 'id_pet' || key === 'name' || key === 'shop_name') {
                             column = { ...column, ...getColumnSearchProps(key) };
                         } else if (key === 'created_at') {
@@ -110,12 +115,11 @@ function PetRpTicket() {
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
         setSearchText(selectedKeys[0]);
-        if (dataIndex === 'name' || dataIndex === 'id_pet' ) {
+        if (dataIndex === 'name' || dataIndex === 'id_pet') {
             // Xây dựng chuỗi tìm kiếm theo name
             const query = `pet.${dataIndex} like '%${selectedKeys[0]}%'`;
             setSearchText(query);
-        }
-        else if (dataIndex === 'shop_name') {
+        } else if (dataIndex === 'shop_name') {
             // Xây dựng chuỗi tìm kiếm theo shop_name
             const query = `shop.name like '%${selectedKeys[0]}%'`;
             setSearchText(query);

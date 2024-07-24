@@ -1,9 +1,15 @@
 import * as httpRequestPetHome from '~/utils/httpRequestPetHome';
 
-export const getBills = async (dataQuery) => {
+export const getBills = async (dataQuery, dataBody) => {
     try {
-        const response = await httpRequestPetHome.get(
+        const response = await httpRequestPetHome.post(
             `/bills?start=${dataQuery.start}&limit=${dataQuery.limit}&admin_paid='${dataQuery.admin_paid}'`,
+            dataBody,
+            {
+                Headers: {
+                    'Content-Type': 'application/json',
+                },
+            },
         );
         return response;
     } catch (error) {
@@ -20,8 +26,7 @@ export const getBillsByShop = async (idShop, dataQuery) => {
     } catch (error) {
         return error.response;
     }
-}
-
+};
 
 export const updateAdminPaidBill = async (idBill, paid_status) => {
     try {
@@ -30,4 +35,4 @@ export const updateAdminPaidBill = async (idBill, paid_status) => {
     } catch (error) {
         return error.response;
     }
-}
+};

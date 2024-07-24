@@ -3,7 +3,7 @@ import styles from './UserList.module.scss';
 import * as userServices from '~/services/userServices';
 import { useEffect, useState, useRef } from 'react';
 import Loading from '~/components/Loading';
-import { Pagination, Table, Button, message, Input, Space, Modal } from 'antd';
+import { Pagination, Table, Button, message, Input, Space, Modal, Tooltip } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -75,6 +75,11 @@ function UserList() {
                             key: key,
                         };
 
+                        if (key === 'id_user') {
+                            column.render = (text) => (
+                                <Tooltip title={text}>{text.length > 9 ? `${text.slice(0, 9)}...` : text}</Tooltip>
+                            );
+                        }
                         if (key === 'status') {
                             column.filters = [
                                 { text: 'Active', value: 'active' },
@@ -93,9 +98,13 @@ function UserList() {
 
                         if (key === 'avatar') {
                             column.render = (text) => (
-                                <a href={text} target="_blank" rel="noopener noreferrer">
-                                    {key.charAt(0).toUpperCase() + key.slice(1)}
-                                </a>
+                                text ? (
+                                    <a href={text} target="_blank" rel="noopener noreferrer">
+                                        {key.charAt(0).toUpperCase() + key.slice(1)}
+                                    </a>
+                                ) : (
+                                    <span>Avatar</span>
+                                )
                             );
                         }
 
@@ -162,7 +171,7 @@ function UserList() {
             formData.append('message', notificationMessage);
 
             const response = await userServices.sendNotification(formData);
-            
+
             if (response.status === 200) {
                 message.success('Gửi thông báo thành công');
                 handleCancel();
@@ -230,6 +239,8 @@ function UserList() {
     if (loading) {
         return <Loading />;
     }
+
+    console.log('data', data);
 
     return (
         <div className={cx('wrapper')}>

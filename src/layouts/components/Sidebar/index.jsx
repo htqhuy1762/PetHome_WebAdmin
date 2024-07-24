@@ -49,17 +49,23 @@ function Sidebar() {
         },
         {
             key: '5',
+            label: 'Bill Management',
+            children: [
+                { key: '/bill/list', label: <a href="/bill/list">List of Bills</a> },
+            ],
+        },
+        {
+            key: '6',
             label: 'User Management',
             children: [
                 { key: '/user/list', label: <a href="/user/list">List of Users</a> },
             ],
         },
         {
-            key: '6',
+            key: '7',
             label: 'System Management',
             children: [
                 { key: '/system/payment', label: <a href="/system/payment">Payment</a> },
-                { key: '/system/type', label: <a href="/system/type">Item, Service, Pet Type</a> },
             ],
         },
     ];
